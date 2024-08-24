@@ -66,7 +66,7 @@ fun createApplicationEntry(name, pathToExe, pathToIcon)
     "
 
     let path = "~/.local/share/applications"
-    $echo entry > path/{name}.desktop$ failed
+    $echo entry > {path}/{name}.desktop$ failed
     {
         echo "WARNING: Couldn't to create desktop entry for application {name}..."
     }
