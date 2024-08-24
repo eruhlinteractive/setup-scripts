@@ -1,0 +1,174 @@
+// This is a setup script for the workspace of @eruhlinteractive
+//  that is meant to setup a Debian-based system
+
+// Get the user
+let user = $whoami$ failed {}
+
+// Wrapper to make a directory and handle if it already exists
+fun makeDir(path)
+{
+    $mkdir {path}$ failed
+    {
+        if status != 1
+        {
+            echo "Failed to create directory: {path}!"
+            return 1
+        }
+    }
+    return 0
+}
+
+fun setup()
+{
+    $sudo apt-get update$ failed
+    {
+        echo "Couldn't update packages. Some install options may fail...";
+    }
+    // Install and setup flatpak
+    $sudo apt-get install -y curl unzip git neovim flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$
+}
+
+// Installs the target packages
+fun installPackages()
+{
+    $flatpak install app/org.blender.Blender/x86_64/stable app/org.gimp.GIMP/x86_64/stable app/md.obsidian.Obsidian/x86_64/stable$ failed
+    {
+        echo "WARNING: Couldn't install flatpak packages"
+        echo ""
+    }
+
+    // Then VSCode from the latest link
+    unsafe $echo "" && echo "Installing VSCode..."$
+    let vscodeLink = "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+
+    $curl -Lo vscode_latest.deb {vscodeLink} && sudo apt install ./vscode_latest.deb && rm vscode_latest.deb$?
+
+    unsafe $echo "" && echo "Installing Discord..."$
+    let discordLink = "https://discord.com/api/download?platform=linux&format=deb"
+    $curl -o discord_latest.deb {discordLink} && sudo apt install ./discord_latest.deb && rm discord_latest.deb$ failed
+    {
+        echo "WARNING: Couldn't to install discord"
+    }
+}
+
+// Creates a new .desktop application
+fun createApplicationEntry(name, pathToExe, pathToIcon)
+{
+    let entry ="
+    [Desktop Entry]
+    Name={name}
+    Exec={pathToExe}
+    Comment=
+    Terminal=false
+    Icon={pathToIcon}
+    Type=Application
+    Hidden=false
+    "
+
+    let path = "~/.local/share/applications"
+    $echo entry > path/{name}.desktop"$ failed
+    {
+        echo "WARNING: Couldn't to create desktop entry for application {name}..."
+    }
+}
+
+fun installApplications(rootPath)
+{
+    let godotPath = rootPath + "/godot"
+    let shouldBail = false
+
+    echo "Installing Godot..." 
+    shouldBail = makeDir(godotPath) == 1
+
+    if not shouldBail
+    {
+        // Download and extract the latest godot executable
+        // Note this expects onlly a single file (the exe) in the archive
+        $curl -Lo {godotPath}/godot_latest.zip https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip && unzip -q {godotPath}/godot_latest.zip -d {godotPath}$ failed 
+        {
+            echo "WARNING: Couldn't unzip the Godot download!"
+            shouldBail = true
+        }
+        unsafe $rm {godotPath}/godot_latest.zip$
+        unsafe $curl -Lo {godotPath}/godot_icon.png https://godotengine.org/assets/press/icon_color.png$
+        
+        // Look for the x86_64 executable file, excluding the zip archive of the same name
+        let file = unsafe $ls {godotPath} | grep -Ei x86_64 | grep -Eiv .zip$
+        $chmod +x {godotPath}/{file}$ failed
+        {
+            echo "WARNING: Couldn't to make Godot executable"
+        }
+        
+    }
+
+    echo ""
+    echo "Installing Nextcloud Desktop..."
+
+    let nextcloudPath = rootPath + "/nextcloud"
+    let hasFailed = makeDir(godotPath) == 1
+    
+    let nextcloudLink = "https://github.com/nextcloud-releases/desktop/releases/download/v3.13.3/Nextcloud-3.13.3-x86_64.AppImage"
+    let nextcloudIconLink = "https://nextcloud.com/c/uploads/2024/07/logo_nextcloud_blue.png?original"
+    $curl -o {nextcloudPath}/nextcloudLatest.AppImage {nextcloudLink} && chmod +x nextcloudLatest.AppImage && curl -o {nextcloudPath}/nextcloudImage.png {nextcloudIconLink}$ failed
+    {
+        echo "WARNING: Couldn't to install Nextcloud Desktop"
+    }
+    createApplicationEntry("Nextcloud", "{nextcloudPath}/nextcloudLatest.AppImage", "{nextcloudPath}/nextcloudImage.png")
+}
+
+main
+{
+    
+}
+echo "Greetings {user}!"
+echo "The following packages will be installed:
+
+Packages:
+- Flatpak
+    - GIMP
+    - Obsidian
+    - Blender
+- VSCode
+- Discord
+- Nextcloud Desktop
+- Neovim
+"
+let shouldInstallPackages = false
+
+// Prompt to install packages
+loop
+{
+    unsafe $echo -n "Sound good? (y/N): "$
+
+    let installPackages = ""
+    unsafe $read installPackages$
+    //echo installPackages
+
+
+    if installPackages == "Y" or installPackages == "y"
+    {
+        shouldInstallPackages = true
+        break
+    }
+    if(installPackages == "N" or installPackages == "n")
+    {
+        shouldInstallPackages = false
+        break
+    }
+}
+
+// Print confirmation
+if shouldInstallPackages == true :echo "Installing packages.." 
+else: echo "Skipping package install.."
+echo ""
+
+if shouldInstallPackages
+{
+    // Start the package install
+    installPackages() failed
+    {
+        echo "Failed to install packages..."
+    }
+    makeDir("/home/{user}/Documents/apps")
+    installApplications("/home/{user}/Documents/apps")
+}
