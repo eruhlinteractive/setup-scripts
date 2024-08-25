@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Written in [Amber](https://amber-lang.com/)
 # version: 0.3.4-alpha
-# date: 2024-08-24 18:30:42
+# date: 2024-08-24 20:52:24
 __AMBER_VAL_0=$(whoami);
 __AS=$?;
 __0_user="${__AMBER_VAL_0}"
@@ -59,7 +59,7 @@ function createApplicationEntry__3_v0 {
     Hidden=false
     "
     local path="~/.local/share/applications"
-    echo entry > path/${name}.desktop;
+    echo entry > ${path}/${name}.desktop;
     __AS=$?;
 if [ $__AS != 0 ]; then
         echo "WARNING: Couldn't to create desktop entry for application ${name}..."
@@ -109,6 +109,30 @@ fi
     createApplicationEntry__3_v0 "Nextcloud" "${nextcloudPath}/nextcloudLatest.AppImage" "${nextcloudPath}/nextcloudImage.png";
     __AF_createApplicationEntry3_v0__116_5=$__AF_createApplicationEntry3_v0;
     echo $__AF_createApplicationEntry3_v0__116_5 > /dev/null 2>&1
+    local neovimPath="${rootPath}""/neovim"
+    local neovimInstallSuccess=1
+    curl -LO ${neovimPath}/nvim-linux64.tar.gz curl https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && tar -C ${neovimPath} -xzf nvim-linux64.tar.gz && mv ${neovimPath}/nvim-linux64/* ${neovimPath} && echo export PATH="$PATH:${neovimPath}/bin" >> ~/.bashrc &&
+    rm ${neovimPath}/nvim-linux64.tar.gz && rm -r ${neovimPath}/nvim-linux64;
+    __AS=$?;
+if [ $__AS != 0 ]; then
+        echo "WARNING: Failed to install Neovim..."
+        neovimInstallSuccess=0
+fi
+    curl -o ${neovimPath}/neovim_icon.png https://avatars2.githubusercontent.com/u/6471485?v=3&s=400;
+    __AS=$?;
+if [ $__AS != 0 ]; then
+__AF_installApplications4_v0=''
+return $__AS
+fi
+    curl -o ${neovimPath}/neovide.AppImage https://github.com/neovide/neovide/releases/latest/download/neovide.AppImage &&
+    chmod u+x ${neovimPath}/neovide.AppImage;
+    __AS=$?;
+if [ $__AS != 0 ]; then
+        echo "Failed to install Neovide frontend!"
+fi
+    createApplicationEntry__3_v0 "neovide" "${neovimPath}/neovide.AppImage" "${neovimPath}/neovim_icon.png";
+    __AF_createApplicationEntry3_v0__135_5=$__AF_createApplicationEntry3_v0;
+    echo $__AF_createApplicationEntry3_v0__135_5 > /dev/null 2>&1
 }
 
     echo "Greetings ${__0_user}!"
@@ -153,12 +177,16 @@ fi
 if [ $__AS != 0 ]; then
             echo "Failed to install packages..."
 fi;
-        __AF_installPackages2_v0__167_9=$__AF_installPackages2_v0;
-        echo $__AF_installPackages2_v0__167_9 > /dev/null 2>&1
+        __AF_installPackages2_v0__187_9=$__AF_installPackages2_v0;
+        echo $__AF_installPackages2_v0__187_9 > /dev/null 2>&1
         makeDir__0_v0 "/home/${__0_user}/Documents/apps";
-        __AF_makeDir0_v0__171_9=$__AF_makeDir0_v0;
-        echo $__AF_makeDir0_v0__171_9 > /dev/null 2>&1
+        __AF_makeDir0_v0__191_9=$__AF_makeDir0_v0;
+        echo $__AF_makeDir0_v0__191_9 > /dev/null 2>&1
         installApplications__4_v0 "/home/${__0_user}/Documents/apps";
-        __AF_installApplications4_v0__172_9=$__AF_installApplications4_v0;
-        echo $__AF_installApplications4_v0__172_9 > /dev/null 2>&1
+        __AS=$?;
+if [ $__AS != 0 ]; then
+            echo "Installation of application failed..."
+fi;
+        __AF_installApplications4_v0__192_9=$__AF_installApplications4_v0;
+        echo $__AF_installApplications4_v0__192_9 > /dev/null 2>&1
 fi

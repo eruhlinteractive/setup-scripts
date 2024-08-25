@@ -1,14 +1,13 @@
 // This is a setup script for the workspace of @eruhlinteractive
 //  that is meant to setup a Debian-based system
-
-// Get the user
-let user = $whoami$ failed {}
+let user = ""
 
 // Wrapper to make a directory and handle if it already exists
 fun makeDir(path)
 {
     $mkdir {path}$ failed
     {
+        // A Status of 1 means the path already exists, which is fine
         if status != 1
         {
             echo "Failed to create directory: {path}!"
@@ -25,7 +24,7 @@ fun setup()
         echo "Couldn't update packages. Some install options may fail...";
     }
     // Install and setup flatpak
-    $sudo apt-get install -y curl unzip git neovim flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$
+    $sudo apt-get install -y curl unzip git flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$
 }
 
 // Installs the target packages
@@ -55,24 +54,67 @@ fun installPackages()
 fun createApplicationEntry(name, pathToExe, pathToIcon)
 {
     let entry ="
-    [Desktop Entry]
-    Name={name}
-    Exec={pathToExe}
-    Comment=
-    Terminal=false
-    Icon={pathToIcon}
-    Type=Application
-    Hidden=false
+    [Desktop Entry]\n
+    Name={name}\n
+    Exec={pathToExe}\n
+    Comment=\n
+    Terminal=false\n
+    Icon={pathToIcon}\n
+    Type=Application\n
+    Hidden=false\n
     "
 
-    let path = "~/.local/share/applications"
-    $echo entry > {path}/{name}.desktop$ failed
+    let path = "/home/{user}/.local/share/applications"
+
+    $echo {entry} > {path}/{name}.desktop$ failed
     {
         echo "WARNING: Couldn't to create desktop entry for application {name}..."
     }
 }
 
-fun installApplications(rootPath)
+fun installNeovim(rootPath)
+{
+    let neovimPath = rootPath + "/neovim"
+    let hasFailed = makeDir(neovimPath) == 1
+
+    // Steps: Download the latest tar, extract it and move any contents into the neovim path, then add it to the system path
+    //  then cleanup the tar and (now empty) extracted file
+    let neovimInstallSuccess = true
+    $curl -Lo {neovimPath}/nvim-linux64.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && tar -C {neovimPath} -xzf {neovimPath}/nvim-linux64.tar.gz &&
+    mv {neovimPath}/nvim-linux64/* {neovimPath} && echo export PATH=\\\"\\\$PATH:{neovimPath}/bin\\\" >> ~/.bashrc &&
+    rm {neovimPath}/nvim-linux64.tar.gz && rm -r {neovimPath}/nvim-linux64$ failed
+    {
+        echo "WARNING: Failed to install Neovim..."
+        neovimInstallSuccess = false
+    }
+    $curl -o {neovimPath}/neovim_icon.png https://avatars2.githubusercontent.com/u/6471485?v=3&s=400$?
+    $curl -o {neovimPath}/neovide.AppImage https://github.com/neovide/neovide/releases/latest/download/neovide.AppImage &&
+    chmod +x {neovimPath}/neovide.AppImage$ failed
+    {
+        echo "Failed to install Neovide frontend!"
+    }
+    createApplicationEntry("neovide", "{neovimPath}/neovide.AppImage","{neovimPath}/neovim_icon.png" )
+}
+
+fun installNextcloud(rootPath)
+{
+    echo ""
+    echo "Installing Nextcloud Desktop..."
+
+    let nextcloudPath = rootPath + "/nextcloud"
+    let hasFailed = makeDir(nextcloudPath) == 1
+    
+    let nextcloudLink = "https://github.com/nextcloud-releases/desktop/releases/download/v3.13.3/Nextcloud-3.13.3-x86_64.AppImage"
+    let nextcloudIconLink = "https://nextcloud.com/c/uploads/2024/07/logo_nextcloud_blue.png?original"
+    $curl -o {nextcloudPath}/nextcloudLatest.AppImage {nextcloudLink} && chmod +x nextcloudLatest.AppImage && curl -o {nextcloudPath}/nextcloudImage.png {nextcloudIconLink}$ failed
+    {
+        echo "WARNING: Couldn't to install Nextcloud Desktop"
+    }
+    createApplicationEntry("Nextcloud", "{nextcloudPath}/nextcloudLatest.AppImage", "{nextcloudPath}/nextcloudImage.png")
+
+}
+
+fun installGodot(rootPath)
 {
     let godotPath = rootPath + "/godot"
     let shouldBail = false
@@ -100,25 +142,22 @@ fun installApplications(rootPath)
         }
         
     }
+}
 
-    echo ""
-    echo "Installing Nextcloud Desktop..."
-
-    let nextcloudPath = rootPath + "/nextcloud"
-    let hasFailed = makeDir(godotPath) == 1
-    
-    let nextcloudLink = "https://github.com/nextcloud-releases/desktop/releases/download/v3.13.3/Nextcloud-3.13.3-x86_64.AppImage"
-    let nextcloudIconLink = "https://nextcloud.com/c/uploads/2024/07/logo_nextcloud_blue.png?original"
-    $curl -o {nextcloudPath}/nextcloudLatest.AppImage {nextcloudLink} && chmod +x nextcloudLatest.AppImage && curl -o {nextcloudPath}/nextcloudImage.png {nextcloudIconLink}$ failed
-    {
-        echo "WARNING: Couldn't to install Nextcloud Desktop"
-    }
-    createApplicationEntry("Nextcloud", "{nextcloudPath}/nextcloudLatest.AppImage", "{nextcloudPath}/nextcloudImage.png")
+fun installApplications(rootPath)
+{
+    installGodot(rootPath)?
+    installNextcloud(rootPath)?
+    installNeovim(rootPath)?
 }
 
 
 main
 {
+    // Get the user
+    user = $whoami$ failed {
+        echo "Failed to determine current user, bailing!"
+    }
     echo "Greetings {user}!"
     echo "The following packages will be installed:
 
@@ -164,12 +203,16 @@ main
     if shouldInstallPackages
     {
         // Start the package install
-        installPackages() failed
-        {
-            echo "Failed to install packages..."
-        }
-        makeDir("/home/{user}/Documents/apps")
-        installApplications("/home/{user}/Documents/apps")
+        //installPackages() failed
+        //{
+        //    echo "Failed to install packages..."
+        //}
+        //makeDir("/home/{user}/Documents/apps")
+        //installApplications("/home/{user}/Documents/apps") failed
+        //{
+        //    echo "Installation of application failed..."
+        //}
+        installNeovim("/home/{user}/applications") failed {}
     }
 
 }
