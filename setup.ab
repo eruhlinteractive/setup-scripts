@@ -82,13 +82,14 @@ fun installNeovim(rootPath)
     let neovimInstallSuccess = true
     $curl -Lo {neovimPath}/nvim-linux64.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && tar -C {neovimPath} -xzf {neovimPath}/nvim-linux64.tar.gz &&
     mv {neovimPath}/nvim-linux64/* {neovimPath} && echo export PATH=\\\"\\\$PATH:{neovimPath}/bin\\\" >> ~/.bashrc &&
+    echo export nvim=\\\"{neovimPath}/bin/nvim\\\" >> ~/.bashrc &&
     rm {neovimPath}/nvim-linux64.tar.gz && rm -r {neovimPath}/nvim-linux64$ failed
     {
         echo "WARNING: Failed to install Neovim..."
         neovimInstallSuccess = false
     }
     $curl -o {neovimPath}/neovim_icon.png https://avatars2.githubusercontent.com/u/6471485?v=3&s=400$?
-    $curl -o {neovimPath}/neovide.AppImage https://github.com/neovide/neovide/releases/latest/download/neovide.AppImage &&
+    $curl -Lo {neovimPath}/neovide.AppImage https://github.com/neovide/neovide/releases/latest/download/neovide.AppImage &&
     chmod +x {neovimPath}/neovide.AppImage$ failed
     {
         echo "Failed to install Neovide frontend!"
@@ -203,16 +204,16 @@ main
     if shouldInstallPackages
     {
         // Start the package install
-        //installPackages() failed
-        //{
-        //    echo "Failed to install packages..."
-        //}
-        //makeDir("/home/{user}/Documents/apps")
-        //installApplications("/home/{user}/Documents/apps") failed
-        //{
-        //    echo "Installation of application failed..."
-        //}
-        installNeovim("/home/{user}/applications") failed {}
+        installPackages() failed
+        {
+            echo "Failed to install packages..."
+        }
+        makeDir("/home/{user}/Documents/apps")
+        installApplications("/home/{user}/Documents/apps") failed
+        {
+            echo "Installation of application failed..."
+        }
+        //installNeovim("/home/{user}/applications") failed {}
     }
 
 }
