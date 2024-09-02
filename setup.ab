@@ -24,13 +24,13 @@ fun setup()
         echo "Couldn't update packages. Some install options may fail...";
     }
     // Install and setup flatpak
-    $sudo apt-get install -y curl unzip git flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$
+    $sudo apt-get install -y curl unzip git steam flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$
 }
 
 // Installs the target packages
 fun installPackages()
 {
-    $flatpak install app/org.blender.Blender/x86_64/stable app/org.gimp.GIMP/x86_64/stable app/md.obsidian.Obsidian/x86_64/stable$ failed
+    $flatpak install app/org.blender.Blender/x86_64/stable app/org.gimp.GIMP/x86_64/stable app/md.obsidian.Obsidian/x86_64/stable app/org.inkscape.Inkscape/x86_64/stable$ failed
     {
         echo "WARNING: Couldn't install flatpak packages"
         echo ""
@@ -167,7 +167,9 @@ main
         - GIMP
         - Obsidian
         - Blender
+        - Inkscape
     - VSCode
+    - Steam
     - Discord
     - Nextcloud Desktop
     - Neovim

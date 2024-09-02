@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Written in [Amber](https://amber-lang.com/)
 # version: 0.3.4-alpha
-# date: 2024-09-02 09:14:20
+# date: 2024-09-02 09:34:42
 __0_user=""
 function makeDir__0_v0 {
     local path=$1
@@ -18,7 +18,7 @@ fi
     return 0
 }
 function installPackages__2_v0 {
-    flatpak install app/org.blender.Blender/x86_64/stable app/org.gimp.GIMP/x86_64/stable app/md.obsidian.Obsidian/x86_64/stable;
+    flatpak install app/org.blender.Blender/x86_64/stable app/org.gimp.GIMP/x86_64/stable app/md.obsidian.Obsidian/x86_64/stable app/org.inkscape.Inkscape/x86_64/stable;
     __AS=$?;
 if [ $__AS != 0 ]; then
         echo "WARNING: Couldn't install flatpak packages"
@@ -183,7 +183,9 @@ fi;
         - GIMP
         - Obsidian
         - Blender
+        - Inkscape
     - VSCode
+    - Steam
     - Discord
     - Nextcloud Desktop
     - Neovim
@@ -217,16 +219,16 @@ fi
 if [ $__AS != 0 ]; then
             echo "Failed to install packages..."
 fi;
-        __AF_installPackages2_v0__207_9=$__AF_installPackages2_v0;
-        echo $__AF_installPackages2_v0__207_9 > /dev/null 2>&1
+        __AF_installPackages2_v0__209_9=$__AF_installPackages2_v0;
+        echo $__AF_installPackages2_v0__209_9 > /dev/null 2>&1
         makeDir__0_v0 "/home/${__0_user}/Documents/apps";
-        __AF_makeDir0_v0__211_9=$__AF_makeDir0_v0;
-        echo $__AF_makeDir0_v0__211_9 > /dev/null 2>&1
+        __AF_makeDir0_v0__213_9=$__AF_makeDir0_v0;
+        echo $__AF_makeDir0_v0__213_9 > /dev/null 2>&1
         installApplications__7_v0 "/home/${__0_user}/Documents/apps";
         __AS=$?;
 if [ $__AS != 0 ]; then
             echo "Installation of application failed..."
 fi;
-        __AF_installApplications7_v0__212_9=$__AF_installApplications7_v0;
-        echo $__AF_installApplications7_v0__212_9 > /dev/null 2>&1
+        __AF_installApplications7_v0__214_9=$__AF_installApplications7_v0;
+        echo $__AF_installApplications7_v0__214_9 > /dev/null 2>&1
 fi
