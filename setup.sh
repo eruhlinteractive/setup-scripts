@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Written in [Amber](https://amber-lang.com/)
 # version: 0.3.4-alpha
-# date: 2024-09-02 09:34:42
+# date: 2024-09-02 10:53:38
 __0_user=""
 function makeDir__0_v0 {
     local path=$1
@@ -16,6 +16,19 @@ fi
 fi
     __AF_makeDir0_v0=0;
     return 0
+}
+function setup__1_v0 {
+    sudo apt-get update;
+    __AS=$?;
+if [ $__AS != 0 ]; then
+        echo "Couldn't update packages. Some install options may fail..."
+fi
+    sudo apt-get install -y curl unzip git steam flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo;
+    __AS=$?;
+if [ $__AS != 0 ]; then
+__AF_setup1_v0=''
+return $__AS
+fi
 }
 function installPackages__2_v0 {
     flatpak install app/org.blender.Blender/x86_64/stable app/org.gimp.GIMP/x86_64/stable app/md.obsidian.Obsidian/x86_64/stable app/org.inkscape.Inkscape/x86_64/stable;
@@ -214,21 +227,32 @@ else
 fi
     echo ""
     if [ ${shouldInstallPackages} != 0 ]; then
-        installPackages__2_v0 ;
+        shouldBail=0
+        setup__1_v0 ;
         __AS=$?;
 if [ $__AS != 0 ]; then
-            echo "Failed to install packages..."
+            echo "Failed to install required packages for setup. Aborting install..."
+            shouldBail=1
 fi;
-        __AF_installPackages2_v0__209_9=$__AF_installPackages2_v0;
-        echo $__AF_installPackages2_v0__209_9 > /dev/null 2>&1
-        makeDir__0_v0 "/home/${__0_user}/Documents/apps";
-        __AF_makeDir0_v0__213_9=$__AF_makeDir0_v0;
-        echo $__AF_makeDir0_v0__213_9 > /dev/null 2>&1
-        installApplications__7_v0 "/home/${__0_user}/Documents/apps";
-        __AS=$?;
+        __AF_setup1_v0__209_9=$__AF_setup1_v0;
+        echo $__AF_setup1_v0__209_9 > /dev/null 2>&1
+        if [ $(echo  '!' ${shouldBail} | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+            installPackages__2_v0 ;
+            __AS=$?;
 if [ $__AS != 0 ]; then
-            echo "Installation of application failed..."
+                echo "Failed to install packages..."
 fi;
-        __AF_installApplications7_v0__214_9=$__AF_installApplications7_v0;
-        echo $__AF_installApplications7_v0__214_9 > /dev/null 2>&1
+            __AF_installPackages2_v0__217_13=$__AF_installPackages2_v0;
+            echo $__AF_installPackages2_v0__217_13 > /dev/null 2>&1
+            makeDir__0_v0 "/home/${__0_user}/Documents/apps";
+            __AF_makeDir0_v0__221_13=$__AF_makeDir0_v0;
+            echo $__AF_makeDir0_v0__221_13 > /dev/null 2>&1
+            installApplications__7_v0 "/home/${__0_user}/Documents/apps";
+            __AS=$?;
+if [ $__AS != 0 ]; then
+                echo "Installation of application failed..."
+fi;
+            __AF_installApplications7_v0__222_13=$__AF_installApplications7_v0;
+            echo $__AF_installApplications7_v0__222_13 > /dev/null 2>&1
+fi
 fi

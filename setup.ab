@@ -24,7 +24,7 @@ fun setup()
         echo "Couldn't update packages. Some install options may fail...";
     }
     // Install and setup flatpak
-    $sudo apt-get install -y curl unzip git steam flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$
+    $sudo apt-get install -y curl unzip git steam flatpak && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo$ ?
 }
 
 // Installs the target packages
@@ -205,16 +205,26 @@ main
 
     if shouldInstallPackages
     {
-        // Start the package install
-        installPackages() failed
+        let shouldBail = false
+        setup() failed
         {
-            echo "Failed to install packages..."
+            echo "Failed to install required packages for setup. Aborting install..."
+            shouldBail = true
         }
-        makeDir("/home/{user}/Documents/apps")
-        installApplications("/home/{user}/Documents/apps") failed
+        if not shouldBail
         {
-            echo "Installation of application failed..."
+             // Start the package install
+            installPackages() failed
+            {
+                echo "Failed to install packages..."
+            }
+            makeDir("/home/{user}/Documents/apps")
+            installApplications("/home/{user}/Documents/apps") failed
+            {
+                echo "Installation of application failed..."
+            }
         }
+       
         //installNeovim("/home/{user}/applications") failed {}
     }
 
